@@ -1,0 +1,172 @@
+# Importación de las librerias necesarias:
+# Rpi.GPIO as GPIO: importa las librerias para el reconocimiento del pin layout de la Raspberry Pi Zero 2 w
+
+import RPi.GPIO as GPIO
+import time 
+
+# Seteo de pines decuerdo a la designación dada por las salida GPIO asignadas
+#EN: 
+ENA = 23
+IN1= 18
+IN2= 24
+
+ENB = 12
+IN3 = 16
+IN4 = 20
+
+ENC = 17
+IN5 = 5
+IN6 = 27
+
+# Seteo con la nomenclatura de el procesador broadcom
+
+GPIO.setmode(GPIO.BCM)
+
+# Seteo pines como puntos de salida de 3,3v logicos 
+
+GPIO.setup(ENA,GPIO.OUT)
+GPIO.setup(IN1,GPIO.OUT)
+GPIO.setup(IN2,GPIO.OUT)
+GPIO.setup(ENB,GPIO.OUT)
+GPIO.setup(IN3,GPIO.OUT)
+GPIO.setup(IN4,GPIO.OUT)
+GPIO.setup(ENC,GPIO.OUT)
+GPIO.setup(IN5,GPIO.OUT)
+GPIO.setup(IN6,GPIO.OUT)
+
+
+#Salidas PWM
+
+pwm_1 = GPIO.PWM(ENA, 500)
+pwm_2 = GPIO.PWM(ENB, 500)
+pwm_3 = GPIO.PWM(ENC, 500)
+pwm_1.start(0)
+pwm_2.start(0)
+pwm_3.start(0)
+
+#Funciones
+
+def avanzarHaciaAtrasFullVelocidad():
+#MOTOR 1    
+    #0 = True
+    #1 = False
+    GPIO.output(IN1, False)
+    GPIO.output(IN2, True)
+    pwm_1.ChangeDutyCycle(100)
+    
+#MOTOR 2
+    GPIO.output(IN3, False)
+    GPIO.output(IN4, True)
+    pwm_2.ChangeDutyCycle(100)
+    
+def avanzarHaciaAdelanteFullVelocidad():
+ #0 = True
+#1 = False
+#MOTOR 1    
+    GPIO.output(IN1, True)
+    GPIO.output(IN2, False)
+    pwm_1.ChangeDutyCycle(100)
+    
+#MOTOR 2
+    GPIO.output(IN3, False)
+    GPIO.output(IN4, True)
+    pwm_2.ChangeDutyCycle(100)
+
+def girarDerecha():
+#MOTOR 1    
+    GPIO.output(IN1, False)
+    GPIO.output(IN2, True)
+    pwm_1.ChangeDutyCycle(10)
+#MOTOR 2
+    GPIO.output(IN3, True)
+    GPIO.output(IN4, False)
+    pwm_2.ChangeDutyCycle(80)
+    
+def girarIzquierda():
+#MOTOR 1    
+   GPIO.output(IN1, True)
+   GPIO.output(IN2, False)
+   pwm_1.ChangeDutyCycle(80)
+#MOTOR 2
+   GPIO.output(IN3, False)
+   GPIO.output(IN4, True)
+   pwm_2.ChangeDutyCycle(10)
+    
+def detener():
+#MOTOR 1    
+   GPIO.output(IN1, True)
+   GPIO.output(IN2, True)
+   pwm_1.ChangeDutyCycle(0)
+#MOTOR 2
+   GPIO.output(IN3, True)
+   GPIO.output(IN4, True)
+   pwm_2.ChangeDutyCycle(0)
+
+def sumergirSub ():
+   GPIO.output(IN5, True)
+   GPIO.output(IN6, False)
+   pwm_3.ChangeDutyCycle(100)
+
+
+def dejarInmersion():
+#Motores en simultaneo
+
+   GPIO.output(IN5, False)
+   GPIO.output(IN6, False)
+   pwm_3.ChangeDutyCycle(100)
+
+   
+#Menu de opciones
+   
+print ("BIENVENIDO :) AL CENTRO DE CONTROL DE NUESTRO SUBMARINO. SELECCIONA LA OPCIÓN QUE DESEES")    
+print ("OPCIONES ADICIONALES: " '\n'
+ "1.  MOVER ADELANTE (W)" '\n'
+ "2.  MOVER ATRÁS (S)" '\n'
+ "3.  MOVER IZQUIERDA (A)" '\n'
+ "4.  MOVER DERECHA (D)" '\n'
+ "5.  SUMERGIR SUBMARINO (Z) - DETER INMERSIÓN (F)" '\n'
+ "7.  DETENER (X)" '\n')
+
+try:
+    while True:
+        cmd = input("Coloca tu opción:   ")
+        op = cmd
+        #1.SUMERGIR SUBMARINO
+        if op == "Z":
+         print ("Sumergiendo...")
+         sumergirSub()
+        #2.AVANZAR 
+        elif op == "W":
+          avanzarHaciaAdelanteFullVelocidad()
+          print ("Avanzando...")
+        #3.ATRÁS
+        elif op == "S":
+         avanzarHaciaAtrasFullVelocidad()
+         print ("Marcha atrás...")
+        #4.DERECHA
+        elif op == "D":
+         girarDerecha()
+         print ("Girando a la derecha...")
+        #5.IZQUIERDA
+        elif op == "A":
+         print ("Girando a la izquierda...")   
+         girarIzquierda()
+        #6.DETENER
+        elif op == "X": 
+         print ("Detenido")   
+         detener()
+        #8.DETENER INMERISIÓN
+        elif op == "F": 
+         print ("Deteniendo inmersión")   
+         dejarInmersion()
+        else: 
+          print ("Comando desconocido")   
+            
+except KeyboardInterrupt: 
+    print ("Apagando...")   
+    time.sleep(5)
+    pwm_1.stop() 
+    pwm_2.stop() 
+    GPIO.cleanup()
+    os.system('clear')
+
